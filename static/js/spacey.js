@@ -20,6 +20,16 @@ function init() {
   canvas.on('mouse:down', function(options) {
     if (options.target) {
       console.log('Clicked on ' + options.target.name);
+      if (options.target.soundId != undefined) {
+        var body = options.target;
+        if (body.soundPlaying) {
+          soundManager.stop(body.soundId);
+          body.soundPlaying = false;
+        } else {
+          body.soundPlaying = true;
+          soundManager.play(body.soundId);
+        }
+      }
     } else {
       console.log('Clicked nothing');
     }
@@ -28,24 +38,25 @@ function init() {
   createPlanet('Sun', 0, 0);
   createPlanet('Mercury', earthDist * 0.45, earthYear * 0.24);
   createPlanet('Venus', earthDist * 0.7, earthYear * 0.6);
-  createPlanet('Earth', earthDist * 0.95, earthYear);
+  createPlanet('Earth', earthDist * 0.95, earthYear, 1, 'earth_whistle.mp3');
   createPlanet('Mars', earthDist * 1.2, earthYear * 1.9);
-  createPlanet('Jupiter', earthDist * 1.8, earthYear * 12, 0.66);
-  createPlanet('Saturn', earthDist * 2.3, earthYear * 29.5, 0.66);
-  createPlanet('Uranus', earthDist * 2.8, earthYear * 84, 0.4);
-  createPlanet('Neptune', earthDist * 3.3, earthYear * 165, 0.4);
+  createPlanet('Jupiter', earthDist * 1.8, earthYear * 12, 0.66, 'jupiter.mp3');
+  createPlanet('Saturn', earthDist * 2.3, earthYear * 29.5, 0.66, 'saturn_radio1.mp3');
+  createPlanet('Uranus', earthDist * 2.8, earthYear * 84, 0.4, 'uranus_rings.mp3');
+  createPlanet('Neptune', earthDist * 3.3, earthYear * 165, 0.4, 'neptune.mp3');
 
   soundManager.setup({
     url: 'static/swf/',
     onready: function() {
-        var testSound = soundManager.createSound({
-          id: 'testSound',
-          url: 'static/sound/earth_whistle.mp3',
-          onfinish: function() {
-            soundManager.play('testSound');
-          }
-        });
-        testSound.play();
+      var bgSound = soundManager.createSound({
+        id: 'bgsound',
+        url: 'static/sound/earth_auroral_rad.mp3',
+        volume: 15,
+        onfinish: function() {
+          soundManager.play('bgsound');
+        }
+      });
+      //bgSound.play();
     }
   });
 
@@ -63,6 +74,7 @@ function resizeCanvas() {
 }
 
 function drawSolarSystem() {
+    // Only draw after all assets are loaded
     if (loadedAssets < totalAssets) return;
 
     var centerX = canvas.getWidth()/2;
@@ -77,14 +89,20 @@ function drawSolarSystem() {
         left: Math.random() * canvas.getWidth(),
         top: Math.random() * canvas.getHeight(),
         fill: 'rgba(255,255,255,'+shine+')',
+        selectable: false,
         radius: 1
       });
+      star.name = "Star " + i;
       canvas.add(star);
     }
 
-    // Add in the bodies
+    // Create orbits first
     bodies.forEach(function(b) {
       createOrbit(b);
+    });
+
+    // Add in the bodies
+    bodies.forEach(function(b) {
       canvas.add(b);
       b.center();
       b.set('left', b.getLeft() - b.distanceFromSun);
@@ -103,22 +121,42 @@ function createOrbit(planet) {
     top: canvas.getHeight() / 2,
     selectable: false
   });
+  orbit.name = planet.name + '\'s orbit';
   canvas.add(orbit);
 }
 
-function createPlanet(name, distance, year, scale) {
+function createPlanet(name, distance, year, scale, sound) {
   totalAssets += 1;
+
+  var soundId = name.toLowerCase();
+
+  // Set up planet image and animation
   fabric.Image.fromURL('static/img/'+name+'.png', function(oImg) {
-    oImg.set('selectable', false);
+    // Planet stuff
     oImg.name = name;
     oImg.distanceFromSun = distance;
     oImg.yearDuration = year;
+    if (sound != undefined) oImg.soundId = soundId;
+
+    oImg.set('selectable', false);
     if (scale != undefined) oImg.scale(scale);
     bodies.push(oImg);
     loadedAssets += 1;
 
-    if (loadedAssets == totalAssets) drawSolarSystem();
+    // Draw the solar system if all assets are now loaded
+    drawSolarSystem();
   });
+
+  // Set up sound file
+  if (sound != undefined) {
+    var testSound = soundManager.createSound({
+      id: soundId,
+      url: 'static/sound/'+sound,
+      onfinish: function() {
+        soundManager.play(soundId);
+      }
+    });
+  }
 }
 
 // Based on Fabric.js solar system demo
