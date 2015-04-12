@@ -1,19 +1,26 @@
 fabric.Object.prototype.originX = 'center';
 fabric.Object.prototype.originY = 'center';
 
+var earthDist = 120;
+var earthYear = 1200;
+var rotationScale = 40; // slow down the orbits
+
 var bodies = [
-  createPlanet('Sun', 40, 'yellow', 0),
-  createPlanet('Mercury', 5, 'red', 75),
-  createPlanet('Venus', 5, 'purple', 90),
-  createPlanet('Earth', 10, 'blue', 120),
-  createPlanet('Mars', 8, 'red', 150)
+  createPlanet('Sun', 25, 'yellow', 0),
+  createPlanet('Mercury', 5, 'red', earthDist * 0.45, earthYear * 0.24),
+  createPlanet('Venus', 5, 'purple', earthDist * 0.7, earthYear * 0.6),
+  createPlanet('Earth', 10, 'blue', earthDist * 0.95, earthYear),
+  createPlanet('Mars', 8, 'red', earthDist * 1.2, earthYear * 1.9),
+  createPlanet('Jupiter', 15, 'pink', earthDist * 1.8, earthYear * 12),
+  createPlanet('Saturn', 10, 'orange', earthDist * 2.3, earthYear * 29.5),
+  createPlanet('Uranus', 7, 'blue', earthDist * 2.8, earthYear * 84),
+  createPlanet('Neptune', 6, 'blue', earthDist * 3.3, earthYear * 165)
 ];
 
 var savedAngles = new Array();
 
 var canvas;
-var tick = 0;
-var rotationScale = 100;
+var animCount = 0;
 
 function init() {
   canvas = new fabric.Canvas('c', {backgroundColor: 'rgb(0,0,0)'});
@@ -27,8 +34,6 @@ function init() {
     }
   });
 
-  setInterval(function () {tick = (tick+1)%360;}, 200);
-
   resizeCanvas();
 }
 
@@ -40,7 +45,8 @@ function resizeCanvas() {
   canvas.setHeight(container.clientHeight);
   canvas.calcOffset();
 
-  canvas.clear();
+  canvas.clear().renderAll();
+
   drawSolarSystem();
 }
 
@@ -48,8 +54,11 @@ function drawSolarSystem() {
     var centerX = canvas.getWidth()/2;
     var centerY = canvas.getHeight()/2;
 
+    animCount += 1;
+
     // Add in the bodies
     bodies.forEach(function(b) {
+      createOrbit(b);
       canvas.add(b);
       b.center();
       b.set('left', b.getLeft() - b.distanceFromSun);
@@ -58,13 +67,26 @@ function drawSolarSystem() {
     });
 }
 
-function createPlanet(name, size, color, distance) {
+function createOrbit(planet) {
+  var orbit = new fabric.Circle({
+    radius: planet.distanceFromSun,
+    stroke: 'rgba(128,128,128, 0.5)',
+    fill: '',
+    left: canvas.getWidth() / 2,
+    top: canvas.getHeight() / 2,
+    selectable: false
+  });
+  canvas.add(orbit);
+}
+
+function createPlanet(name, size, color, distance, year) {
   return new fabric.Circle({
     radius: size,
     fill: color,
     selectable: false,
     name: name,
-    distanceFromSun: distance
+    distanceFromSun: distance,
+    yearDuration: year
   });
 }
 
@@ -78,11 +100,18 @@ function animatePlanet(planet) {
   var radius = planet.distanceFromSun;
 
   // speed of rotation slows down for further planets
-  var duration = planet.distanceFromSun * rotationScale;
+  var duration = planet.yearDuration * rotationScale;
 
   // randomize starting angle to avoid planets starting on one line
-  var startAngle = savedAngles[planet.name] || fabric.util.getRandomInt(-180, 0);
+  // TODO save previous angles
+  //var startAngle = savedAngles[planet.name] || fabric.util.getRandomInt(-180, 0);
+  var startAngle = fabric.util.getRandomInt(-180, 0);
   var endAngle = startAngle + 359;
+
+  // hack to kill the infinite animation loops. when the
+  // canvas is resized the count changes and then this animation
+  // function should stop looping
+  var animGroup = animCount;
 
   (function animate() {
 
@@ -95,6 +124,8 @@ function animatePlanet(planet) {
       easing: function(t, b, c, d) { return c*t/d + b; },
 
       onChange: function(angle) {
+        if (animGroup != animCount) return;
+
         angle = fabric.util.degreesToRadians(angle);
         savedAngles[planet.name] = angle;
 
@@ -103,12 +134,11 @@ function animatePlanet(planet) {
 
         planet.set({ left: x, top: y }).setCoords();
 
-        // TODO render once per cycle
         canvas.renderAll();
-
-        console.log("Animated " + planet.name);
       },
-      onComplete: animate
+      onComplete: function() {
+        if (animGroup == animCount) animate();
+      }
     });
   })();
 }
