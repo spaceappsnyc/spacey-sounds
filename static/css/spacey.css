@@ -16,6 +16,8 @@ body {
   background-color: #ff9933;
   color: white;
   text-align: center;
+  font-family: 'Titillium Web', sans-serif;
+  font-size: 200%;
 }
 
 #canvasContainer {
