@@ -35,6 +35,20 @@ function init() {
   createPlanet('Uranus', earthDist * 2.8, earthYear * 84, 0.4);
   createPlanet('Neptune', earthDist * 3.3, earthYear * 165, 0.4);
 
+  soundManager.setup({
+    url: 'static/swf/',
+    onready: function() {
+        var testSound = soundManager.createSound({
+          id: 'testSound',
+          url: 'static/sound/earth_whistle.mp3',
+          onfinish: function() {
+            soundManager.play('testSound');
+          }
+        });
+        testSound.play();
+    }
+  });
+
   resizeCanvas();
 }
 
