@@ -3,20 +3,30 @@
   <head>
     <title>Spacey Sounds</title>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="static/css/spacey.css">
+
     <link href='http://fonts.googleapis.com/css?family=Titillium+Web:600' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="static/css/genericons.css">
+    <link rel="stylesheet" href="static/css/spacey.css">
+
     <script src="http://cdnjs.cloudflare.com/ajax/libs/fabric.js/1.4.0/fabric.min.js"></script>
     <script src="static/js/spacey.js"></script>
   </head>
+
   <body onload="init()" onresize="resizeCanvas()">
+
     <div id="canvasContainer">
       <canvas id="c">
-        Your browser does not support canvas :(
+        Canvas is disabled or not supported by your browser.
       </canvas>
     </div>
 
     <div id="drawer">
-      Spacey Sounds
+      <h1>Spacey Sounds</h1>
+      <p>
+        <a href="https://github.com/spaceappsnyc/spacey-sounds"><span class="genericon genericon-github"></span></a>
+      </p>
     </div>
+
   </body>
+
 </html>

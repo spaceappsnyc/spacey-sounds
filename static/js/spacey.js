@@ -90,6 +90,17 @@ function createPlanet(name, size, color, distance, year) {
   });
 }
 
+function createPlanetPNG(name, size, color, distance, year) {
+  return new fabric.Circle({
+    radius: size,
+    fill: color,
+    selectable: false,
+    name: name,
+    distanceFromSun: distance,
+    yearDuration: year
+  });
+}
+
 // Based on Fabric.js solar system demo
 function animatePlanet(planet) {
   if (planet.name == 'Sun') return;

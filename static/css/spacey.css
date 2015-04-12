@@ -8,6 +8,12 @@ body {
   overflow: hidden;
 }
 
+.genericon {
+    font-size: xx-large;
+    text-decoration: none !important;
+    color: white;
+}
+
 #drawer {
   width: 15%;
   height: 100%;
@@ -17,7 +23,6 @@ body {
   color: white;
   text-align: center;
   font-family: 'Titillium Web', sans-serif;
-  font-size: 200%;
 }
 
 #canvasContainer {
