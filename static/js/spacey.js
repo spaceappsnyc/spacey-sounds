@@ -6,15 +6,15 @@ var earthYear = 1200;
 var rotationScale = 40; // slow down the orbits
 
 var bodies = [
-  createPlanet('Sun', 25, 'yellow', 0),
-  createPlanet('Mercury', 5, 'red', earthDist * 0.45, earthYear * 0.24),
-  createPlanet('Venus', 5, 'purple', earthDist * 0.7, earthYear * 0.6),
-  createPlanet('Earth', 10, 'blue', earthDist * 0.95, earthYear),
-  createPlanet('Mars', 8, 'red', earthDist * 1.2, earthYear * 1.9),
-  createPlanet('Jupiter', 15, 'pink', earthDist * 1.8, earthYear * 12),
-  createPlanet('Saturn', 10, 'orange', earthDist * 2.3, earthYear * 29.5),
-  createPlanet('Uranus', 7, 'blue', earthDist * 2.8, earthYear * 84),
-  createPlanet('Neptune', 6, 'blue', earthDist * 3.3, earthYear * 165)
+  createPlanet('Sun', 0, 0),
+  createPlanet('Mercury', earthDist * 0.45, earthYear * 0.24),
+  createPlanet('Venus', earthDist * 0.7, earthYear * 0.6),
+  createPlanet('Earth', earthDist * 0.95, earthYear),
+  createPlanet('Mars', earthDist * 1.2, earthYear * 1.9),
+  createPlanet('Jupiter', earthDist * 1.8, earthYear * 12, 0.66),
+  createPlanet('Saturn', earthDist * 2.3, earthYear * 29.5, 0.66),
+  createPlanet('Uranus', earthDist * 2.8, earthYear * 84, 0.4),
+  createPlanet('Neptune', earthDist * 3.3, earthYear * 165, 0.4)
 ];
 
 var savedAngles = new Array();
@@ -39,8 +39,6 @@ function init() {
 
 function resizeCanvas() {
   var container = document.getElementById('canvasContainer');
-  //canvas.setWidth(document.documentElement.clientWidth);
-  //canvas.setHeight(document.documentElement.clientHeight);
   canvas.setWidth(container.clientWidth);
   canvas.setHeight(container.clientHeight);
   canvas.calcOffset();
@@ -59,12 +57,10 @@ function drawSolarSystem() {
     // Add in the bodies
     bodies.forEach(function(b) {
       createOrbit(b);
-      canvas.add(b);
-      b.center();
-      b.set('left', b.getLeft() - b.distanceFromSun);
-      animatePlanet(b);
-      canvas.renderAll();
+      createPlanetPNG(b);
     });
+
+    canvas.renderAll();
 }
 
 function createOrbit(planet) {
@@ -79,25 +75,27 @@ function createOrbit(planet) {
   canvas.add(orbit);
 }
 
-function createPlanet(name, size, color, distance, year) {
-  return new fabric.Circle({
-    radius: size,
-    fill: color,
-    selectable: false,
+function createPlanet(name, distance, year, scale) {
+  return {
     name: name,
     distanceFromSun: distance,
-    yearDuration: year
-  });
+    yearDuration: year,
+    scale: scale || 1.0
+  };
 }
 
-function createPlanetPNG(name, size, color, distance, year) {
-  return new fabric.Circle({
-    radius: size,
-    fill: color,
-    selectable: false,
-    name: name,
-    distanceFromSun: distance,
-    yearDuration: year
+function createPlanetPNG(planetInfo) {
+  fabric.Image.fromURL('static/img/'+planetInfo.name+'.png', function(oImg) {
+    oImg.set('selectable', false);
+    oImg.name = planetInfo.name;
+    oImg.distanceFromSun = planetInfo.distanceFromSun;
+    oImg.yearDuration = planetInfo.yearDuration;
+    if (planetInfo.scale != 1.0) oImg.scale(planetInfo.scale);
+    canvas.add(oImg);
+
+    oImg.center();
+    oImg.set('left', oImg.getLeft() - oImg.distanceFromSun);
+    animatePlanet(oImg);
   });
 }
 
@@ -116,7 +114,7 @@ function animatePlanet(planet) {
   // randomize starting angle to avoid planets starting on one line
   // TODO save previous angles
   //var startAngle = savedAngles[planet.name] || fabric.util.getRandomInt(-180, 0);
-  var startAngle = fabric.util.getRandomInt(-180, 0);
+  var startAngle = fabric.util.getRandomInt(-180, 180);
   var endAngle = startAngle + 359;
 
   // hack to kill the infinite animation loops. when the
