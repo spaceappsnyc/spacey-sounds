@@ -54,6 +54,18 @@ function drawSolarSystem() {
 
     animCount += 1;
 
+    // Create stars
+    for (var i = 0; i < 50; i++) {
+      var gray = Math.random() * 128 + 64;
+      var star = new fabric.Circle({
+        left: Math.random() * canvas.getWidth(),
+        top: Math.random() * canvas.getHeight(),
+        fill: 'rgba(255,255,255,'+Math.random()+')',
+        radius: 1
+      });
+    canvas.add(star);
+    }
+
     // Add in the bodies
     bodies.forEach(function(b) {
       createOrbit(b);
