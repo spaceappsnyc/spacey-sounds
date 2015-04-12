@@ -6,7 +6,7 @@ var earthYear = 1200;
 var rotationScale = 40; // slow down the orbits
 
 var bodies = new Array();
-var savedAngles = new Array();
+var savedAngles = new Object();
 
 var canvas;
 var animCount = 0;
@@ -120,9 +120,7 @@ function animatePlanet(planet) {
   var duration = planet.yearDuration * rotationScale;
 
   // randomize starting angle to avoid planets starting on one line
-  // TODO save previous angles
-  //var startAngle = savedAngles[planet.name] || fabric.util.getRandomInt(-180, 0);
-  var startAngle = fabric.util.getRandomInt(-180, 180);
+  var startAngle = savedAngles[planet.name] || fabric.util.getRandomInt(-180, 0);
   var endAngle = startAngle + 359;
 
   // hack to kill the infinite animation loops. when the
@@ -143,8 +141,8 @@ function animatePlanet(planet) {
       onChange: function(angle) {
         if (animGroup != animCount) return;
 
-        angle = fabric.util.degreesToRadians(angle);
         savedAngles[planet.name] = angle;
+        angle = fabric.util.degreesToRadians(angle);
 
         var x = cx + radius * Math.cos(angle);
         var y = cy + radius * Math.sin(angle);
