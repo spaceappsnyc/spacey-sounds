@@ -33,8 +33,11 @@ function init() {
 }
 
 function resizeCanvas() {
-  canvas.setWidth(document.documentElement.clientWidth);
-  canvas.setHeight(document.documentElement.clientHeight);
+  var container = document.getElementById('canvasContainer');
+  //canvas.setWidth(document.documentElement.clientWidth);
+  //canvas.setHeight(document.documentElement.clientHeight);
+  canvas.setWidth(container.clientWidth);
+  canvas.setHeight(container.clientHeight);
   canvas.calcOffset();
 
   canvas.clear();

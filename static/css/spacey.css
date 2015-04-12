@@ -7,3 +7,19 @@ body {
   margin: 0;
   overflow: hidden;
 }
+
+#drawer {
+  width: 15%;
+  height: 100%;
+  float: left;
+
+  background-color: #ff9933;
+  color: white;
+  text-align: center;
+}
+
+#canvasContainer {
+  width: 85%;
+  height: 100%;
+  float: right;
+}
