@@ -131,7 +131,7 @@ function createPlanet(name, distance, year, scale, sound) {
   var soundId = name.toLowerCase();
 
   // Set up planet image and animation
-  fabric.Image.fromURL('static/img/'+name+'.png', function(oImg) {
+  fabric.Image.fromURL('static/img/'+name.toLowerCase()+'.png', function(oImg) {
     // Planet stuff
     oImg.name = name;
     oImg.distanceFromSun = distance;
